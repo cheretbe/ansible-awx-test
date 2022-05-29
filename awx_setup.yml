@@ -2,6 +2,9 @@
 - name: Deploy an instance of AWX using the awx-operator
   hosts: all
 
+  vars:
+    aws_memory_size_test: "2Gi"
+
   tasks:
     - name: Set AWX admin password
       kubernetes.core.k8s:
@@ -25,8 +28,9 @@
           metadata:
             name: awx
           spec:
-            service_type: nodeport
-
+            # service_type: nodeport
+            web_resource_requirements:
+              memory: "{{ aws_memory_size_test }}"
     - name: Wait for AWX Postgres pod to become ready
       command: "kubectl wait --namespace=awx --for=condition=Ready pods --selector app.kubernetes.io/instance=postgres-awx --timeout=600s"
       changed_when: false
@@ -35,3 +39,7 @@
       command: "kubectl wait --namespace=awx --for=condition=Ready pods --selector app.kubernetes.io/component=awx --timeout=600s"
       changed_when: false
       # register: awx_pods_ready
+
+    - name: Memory size limit
+    - debug:
+        msg: "Memory size limit for 'awx-web' container: {{ aws_memory_size_test }}"
