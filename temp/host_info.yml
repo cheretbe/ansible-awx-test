@@ -1,0 +1,13 @@
+---
+
+- name: Test playbook
+  hosts: all
+
+  tasks:
+    - name: Print host information
+      debug:
+        msg: "{{ ansible_fqdn }}: {{ ansible_distribution }} {{ ansible_distribution_version}}"
+
+    - name: Print IP addresses
+      debug:
+        var: ansible_all_ipv4_addresses
