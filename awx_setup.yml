@@ -41,5 +41,5 @@
       # register: awx_pods_ready
 
     - name: Memory size limit
-    - debug:
+      debug:
         msg: "Memory size limit for 'awx-web' container: {{ aws_memory_size_test }}"
