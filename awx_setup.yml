@@ -1,0 +1,37 @@
+---
+- name: Deploy an instance of AWX using the awx-operator
+  hosts: all
+
+  tasks:
+    - name: Set AWX admin password
+      kubernetes.core.k8s:
+        state: present
+        apply: true
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: awx-admin-password
+            namespace: awx
+          stringData:
+            password: "password"
+
+    - name: Install AWX
+      kubernetes.core.k8s:
+        namespace: awx
+        definition:
+          apiVersion: awx.ansible.com/v1beta1
+          kind: AWX
+          metadata:
+            name: awx
+          spec:
+            service_type: nodeport
+
+    - name: Wait for AWX Postgres pod to become ready
+      command: "kubectl wait --namespace=awx --for=condition=Ready pods --selector app.kubernetes.io/instance=postgres-awx --timeout=600s"
+      changed_when: false
+
+    - name: Wait for AWX pods to become ready
+      command: "kubectl wait --namespace=awx --for=condition=Ready pods --selector app.kubernetes.io/component=awx --timeout=600s"
+      changed_when: false
+      # register: awx_pods_ready
